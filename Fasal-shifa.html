@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فصل شفا - AI Crop Disease Detection System Pakistan</title>
+  <meta name="description" content="University-grade AI-powered Pakistani crop disease detection platform. Supports custom PyTorch model, Supabase authentication, database telemetry, and n8n Docker pipeline.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body lang="ur">
+
+  <div class="app-container">
+    
+    <!-- Navbar Header -->
+    <header class="navbar">
+      <div class="brand-logo">
+        <div class="logo-icon">🌱</div>
+        <div>
+          <h1 class="brand-title">Fasal Shifa <span class="urdu-title" style="font-size: 24px; -webkit-text-fill-color: #34d399;">فصل شفا</span></h1>
+          <p class="brand-subtitle">AI Crop Disease Surveillance & Pathology Platform (Pakistan)</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Model Engine Selector -->
+        <div class="engine-select-box">
+          <label for="selectEngine" style="font-size: 12px; color: var(--text-muted);">Model:</label>
+          <select id="selectEngine">
+            <option value="auto">⚡ Auto (Best Available)</option>
+            <option value="custom">🧠 Custom DL Model (Student)</option>
+            <option value="gemini">✨ Gemini 1.5 Flash Vision</option>
+            <option value="fallback">🔬 Offline Knowledge Graph</option>
+          </select>
+        </div>
+
+        <!-- Language Switcher -->
+        <button id="btnLangUr" class="btn btn-primary btn-sm">اردو</button>
+        <button id="btnLangEn" class="btn btn-glass btn-sm">English</button>
+
+        <!-- Scan History Modal Trigger -->
+        <button id="btnOpenHistory" class="btn btn-glass btn-sm">
+          📊 <span>My Scans</span>
+        </button>
+
+        <!-- API & DB Settings Modal Button -->
+        <button id="btnOpenSettings" class="btn btn-glass btn-sm">
+          ⚙️ <span>Config</span>
+        </button>
+
+        <!-- Authentication Container -->
+        <div id="authContainer">
+          <!-- Logged Out View -->
+          <div id="authLoggedOut">
+            <button id="btnOpenAuth" class="btn btn-primary btn-sm">
+              🔑 <span>Login / Sign Up</span>
+            </button>
+          </div>
+
+          <!-- Logged In View -->
+          <div id="authLoggedIn" style="display: none;" class="user-profile-badge">
+            <div class="user-avatar" id="navUserAvatar">U</div>
+            <div>
+              <div class="user-name-label" id="navUserName">Student</div>
+              <span class="user-role-pill" id="navUserRole">student</span>
+            </div>
+            <button id="btnSignOut" class="btn btn-glass btn-sm" style="padding: 4px 8px; font-size: 11px;">Logout</button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        🇵🇰 Optimized for Pakistani Agriculture, Extension Services & Academic Research
+      </div>
+      <h2 class="hero-heading">
+        Diagnose Crop Diseases in <span>Seconds with Custom AI</span>
+      </h2>
+      <p class="hero-subtext">
+        Powered by custom deep learning transfer learning & multimodal vision. Instant disease identification, visual reasoning, organic cures, and official Pakistani pesticide recommendations in English and Urdu.
+      </p>
+    </section>
+
+    <!-- Crop Selection Grid -->
+    <section>
+      <h3 class="section-title">
+        🌾 Select Crop Type / فصل کا انتخاب کریں
+      </h3>
+      <div class="crop-grid">
+        <div class="crop-card active" data-crop="wheat">
+          <div class="crop-icon">🌾</div>
+          <div class="crop-name-en">Wheat</div>
+          <div class="crop-name-ur">گندم</div>
+        </div>
+        <div class="crop-card" data-crop="rice">
+          <div class="crop-icon">🌾</div>
+          <div class="crop-name-en">Rice</div>
+          <div class="crop-name-ur">چاول / دھان</div>
+        </div>
+        <div class="crop-card" data-crop="cotton">
+          <div class="crop-icon">☁️</div>
+          <div class="crop-name-en">Cotton</div>
+          <div class="crop-name-ur">کپاس</div>
+        </div>
+        <div class="crop-card" data-crop="tomato">
+          <div class="crop-icon">🍅</div>
+          <div class="crop-name-en">Tomato</div>
+          <div class="crop-name-ur">ٹماٹر</div>
+        </div>
+        <div class="crop-card" data-crop="potato">
+          <div class="crop-icon">🥔</div>
+          <div class="crop-name-en">Potato</div>
+          <div class="crop-name-ur">آلو</div>
+        </div>
+        <div class="crop-card" data-crop="maize">
+          <div class="crop-icon">🌽</div>
+          <div class="crop-name-en">Maize</div>
+          <div class="crop-name-ur">مکئی</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Studio Main Grid: Upload & Diagnostics -->
+    <main class="studio-grid">
+      
+      <!-- Left Panel: Camera & Upload Studio -->
+      <div class="upload-card">
+        <h3 class="section-title">
+          📷 Capture Leaf Photo / تصویر اپلوڈ کریں
+        </h3>
+
+        <!-- Drag & Drop Zone -->
+        <div id="dropZone" class="drop-zone">
+          <div class="upload-icon">📸</div>
+          <p style="font-weight: 700; margin-bottom: 4px;">Click or Drag Leaf Image Here</p>
+          <p style="font-size: 13px; color: var(--text-muted);">پتے کی واضح تصویر یہاں اپلوڈ کریں</p>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+
+        <!-- Live Camera Stream Box -->
+        <div id="cameraBox" class="camera-box">
+          <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+          <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">
+            <button id="btnSnap" class="btn btn-primary">📸 Snap Photo</button>
+          </div>
+        </div>
+
+        <!-- Image Preview Container -->
+        <div id="previewContainer" class="preview-container">
+          <img id="previewImg" class="preview-img" src="" alt="Selected Crop Leaf">
+          <div class="preview-overlay">
+            <button id="btnRemoveImg" class="btn btn-glass btn-sm">❌ Remove</button>
+          </div>
+        </div>
+
+        <!-- Action Toolbar -->
+        <div style="display: flex; gap: 10px;">
+          <button id="btnCamera" class="btn btn-glass" style="flex: 1;">🎥 Live Camera</button>
+          <button id="btnAnalyze" class="btn btn-primary" style="flex: 2;">🔍 Analyze Leaf with AI</button>
+        </div>
+
+        <!-- Quick Demo Leaf Samples -->
+        <div style="margin-top: 10px;">
+          <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">⚡ Quick Test Samples (متاثرہ پتوں کے نمونے):</p>
+          <div class="samples-toolbar">
+            <span class="sample-chip" data-crop="wheat">🌾 Wheat Yellow Rust</span>
+            <span class="sample-chip" data-crop="cotton">☁️ Cotton Leaf Curl</span>
+            <span class="sample-chip" data-crop="rice">🌾 Rice Leaf Blight</span>
+            <span class="sample-chip" data-crop="tomato">🍅 Tomato Late Blight</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Diagnostic Results -->
+      <div class="diag-card">
+        
+        <!-- Placeholder State -->
+        <div id="placeholderState" class="placeholder-state">
+          <div class="placeholder-icon">🔬</div>
+          <h3>Awaiting Leaf Image</h3>
+          <p style="color: var(--text-muted); font-size: 14px; margin-top: 6px;">
+            Select a crop and upload an infected leaf image to view AI diagnosis, visual reasoning, and treatment advisory.
+          </p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+          <div class="pulse-spinner"></div>
+          <h3 style="color: var(--brand-green);">AI Visual Inspection in Progress...</h3>
+          <p style="color: var(--text-muted); font-size: 14px; margin-top: 6px;">
+            تجزیہ جاری ہے ... ماڈل بیماری کی شناخت کر رہا ہے
+          </p>
+        </div>
+
+        <!-- Results Display State -->
+        <div id="resultsState" class="results-state">
+          <div class="result-header">
+            <div class="disease-titles">
+              <h2 id="resDiseaseEn">Yellow Rust</h2>
+              <div id="resDiseaseUr" class="disease-ur">پیلی رسٹ (رتوبا)</div>
+            </div>
+            <span id="resSeverity" class="severity-pill severity-High">High Severity</span>
+          </div>
+
+          <!-- Key Metrics -->
+          <div class="metrics-bar">
+            <div class="metric-box">
+              <div class="metric-label">AI Confidence</div>
+              <div id="resConfidence" class="metric-val">96%</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Pathogen Category</div>
+              <div id="resPathogen" class="metric-val">Fungal</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Engine Active</div>
+              <div id="resEngine" class="metric-val" style="font-size: 13px; color: var(--accent-cyan);">Custom PyTorch</div>
+            </div>
+          </div>
+
+          <!-- Diagnostic Reasoning -->
+          <div class="remedy-box">
+            <div class="remedy-header" style="color: var(--accent-cyan);">
+              🔍 Visual AI Reasoning & Symptoms (بیماری کی نشاندہی اور وجوہات)
+            </div>
+            <div id="resReasoningEn" class="remedy-content"></div>
+            <div id="resReasoningUr" class="remedy-content-ur"></div>
+          </div>
+
+          <!-- Organic Remedy -->
+          <div class="remedy-box">
+            <div class="remedy-header organic">
+              🌿 Organic / Bio Treatment (نامیاتی علاج)
+            </div>
+            <div id="resOrganicEn" class="remedy-content"></div>
+            <div id="resOrganicUr" class="remedy-content-ur"></div>
+          </div>
+
+          <!-- Pakistani Market Chemical Treatment -->
+          <div class="remedy-box">
+            <div class="remedy-header chemical">
+              🧪 Pakistani Market Pesticide / Fungicide (کیمیائی زہر اور مقدار)
+            </div>
+            <div id="resChemicalEn" class="remedy-content"></div>
+            <div id="resChemicalUr" class="remedy-content-ur"></div>
+          </div>
+
+          <!-- Prevention Advisory -->
+          <div class="remedy-box">
+            <div class="remedy-header prevention">
+              🛡️ Preventive Advisory for Next Season (بچاؤ کی تدابیر)
+            </div>
+            <div id="resPreventionEn" class="remedy-content"></div>
+            <div id="resPreventionUr" class="remedy-content-ur"></div>
+          </div>
+
+          <!-- Audio Read-Aloud Toolbar -->
+          <div class="audio-bar">
+            <div>
+              <div style="font-weight: 700; font-size: 14px;">Farmer Voice Advisory</div>
+              <div style="font-size: 12px; color: var(--text-muted);">اردو اور انگریزی میں سنیں</div>
+            </div>
+            <button id="btnPlayAudio" class="btn btn-primary btn-sm">
+              <span>🔊</span> <span id="audioTextEn">Listen Audio / سنیں</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Fasal Shifa AI - University Capstone Research & Surveillance Project</p>
+      <p style="margin-top: 4px; font-size: 12px; color: rgba(255,255,255,0.4);">
+        Agriculture Extension Helpline: 0800-15000 | Built with PyTorch, Supabase, n8n, and Vercel
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- 1. Authentication Modal (Login / Sign Up) -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="authModalTitle" style="font-size: 18px; font-weight: 700;">Account Portal / صارف کا اکاؤنٹ</h3>
+        <button id="btnCloseAuthModal" class="btn btn-glass btn-sm">✕</button>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabLogin" class="auth-tab-btn active">Login (لاگ ان)</button>
+        <button id="tabRegister" class="auth-tab-btn">Sign Up (رجسٹریشن)</button>
+      </div>
+
+      <div id="authAlert" class="auth-alert"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label">Email Address / ای میل:</label>
+          <input type="email" id="loginEmail" class="form-input" required placeholder="student@university.edu.pk">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password / پاس ورڈ:</label>
+          <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••">
+        </div>
+        <button type="submit" id="btnLoginSubmit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+          Sign In / داخل ہوں
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Full Name / پورا نام:</label>
+          <input type="text" id="regFullName" class="form-input" required placeholder="Muhammad Ali">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address / ای میل:</label>
+          <input type="email" id="regEmail" class="form-input" required placeholder="student@university.edu.pk">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role / کردار:</label>
+          <select id="regRole" class="form-input">
+            <option value="student">Student / طالب علم</option>
+            <option value="farmer">Farmer / کسان</option>
+            <option value="researcher">Researcher / محقق</option>
+            <option value="agri_officer">Agri Officer / فیلڈ آفیسر</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password / پاس ورڈ (Min 6 chars):</label>
+          <input type="password" id="regPassword" class="form-input" required minlength="6" placeholder="••••••••">
+        </div>
+        <button type="submit" id="btnRegisterSubmit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+          Create Free Account / نیا اکاؤنٹ بنائیں
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Scan History Modal (Saved in Database) -->
+  <div id="historyModal" class="modal-overlay">
+    <div class="modal-card history-modal-card">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 18px; font-weight: 700;">📊 My Diagnosis History / سابقہ معائنہ جات</h3>
+          <p style="font-size: 12px; color: var(--text-muted);">Synced directly with Supabase PostgreSQL Database</p>
+        </div>
+        <button id="btnCloseHistoryModal" class="btn btn-glass btn-sm">✕</button>
+      </div>
+
+      <div class="history-table-container">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Crop</th>
+              <th>Disease Detected</th>
+              <th>Urdu Name</th>
+              <th>Severity</th>
+              <th>Confidence</th>
+              <th>Engine Used</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                No scan history found. Run your first leaf scan to see records!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. System Configuration Modal (API, Supabase, n8n) -->
+  <div id="apiModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 700;">⚙️ System Configuration (100% Free Tools)</h3>
+        <button id="btnCloseModal" class="btn btn-glass btn-sm">✕</button>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Connect your free custom deep learning model, Supabase database, or n8n Docker pipeline below.
+      </p>
+
+      <div class="form-group">
+        <label class="form-label">Custom Deep Learning Model API (FastAPI / Hugging Face Spaces):</label>
+        <input type="text" id="inputCustomModelUrl" class="form-input" placeholder="http://localhost:8000/predict">
+        <p style="font-size: 11px; color: var(--brand-green); margin-top: 4px;">Run <code>python inference_api.py</code> to test your custom PyTorch model locally or on HF Spaces.</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Supabase Project URL (PostgreSQL Cloud DB):</label>
+        <input type="text" id="inputSupabaseUrl" class="form-input" placeholder="https://xxxxxxxx.supabase.co">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Supabase Anon Key (Public API Key):</label>
+        <input type="text" id="inputSupabaseAnonKey" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Google Gemini 1.5 Flash API Key (Optional Multimodal Validator):</label>
+        <input type="text" id="inputGeminiKey" class="form-input" placeholder="AIzaSy...">
+        <p style="font-size: 11px; color: var(--brand-green); margin-top: 4px;">Free 1,500 requests/day from aistudio.google.com</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">n8n Docker Webhook URL (Automation Pipeline):</label>
+        <input type="text" id="inputN8nUrl" class="form-input" placeholder="http://localhost:5678/webhook/crop-scan">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button id="btnSaveSettings" class="btn btn-primary">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CDN: Supabase JavaScript SDK for Real Auth & Database Connection -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- JavaScript Application Modules -->
+  <script src="js/dataset-db.js"></script>
+  <script src="js/auth-client.js"></script>
+  <script src="js/ai-engine.js"></script>
+  <script src="js/n8n-client.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
